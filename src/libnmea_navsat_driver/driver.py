@@ -40,8 +40,12 @@ from sensor_msgs.msg import NavSatFix, NavSatStatus, TimeReference
 from geometry_msgs.msg import TwistStamped, QuaternionStamped
 from tf.transformations import quaternion_from_euler
 
+from nav_msgs.msg import Path
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
+from WGS84toUTM import WGS84toUTM
+from utmConvertor import UTM
+from geometry_msgs.msg import PoseStamped
 
 
 class RosNMEADriver(object):
@@ -70,6 +74,7 @@ class RosNMEADriver(object):
         self.vel_pub = rospy.Publisher('vel', TwistStamped, queue_size=1)
         self.heading_pub = rospy.Publisher(
             'heading', QuaternionStamped, queue_size=1)
+	self.path_pub = rospy.Publisher('path',Path,queue_size=1)
         self.use_GNSS_time = rospy.get_param('~use_GNSS_time', False)
         if not self.use_GNSS_time:
             self.time_ref_pub = rospy.Publisher(
@@ -91,7 +96,13 @@ class RosNMEADriver(object):
         self.lon_std_dev = float("nan")
         self.lat_std_dev = float("nan")
         self.alt_std_dev = float("nan")
-
+	
+	# path param
+	self.start_flag = False
+	self.start_x = 0
+	self.start_y = 0
+	self.path = Path()
+	self.path.header.frame_id = "gps"
         """Format for this dictionary is the fix type from a GGA message as the key, with
         each entry containing a tuple consisting of a default estimated
         position error, a NavSatStatus value, and a NavSatFix covariance value."""
@@ -291,6 +302,22 @@ class RosNMEADriver(object):
                     NavSatFix.COVARIANCE_TYPE_UNKNOWN
 
                 self.fix_pub.publish(current_fix)
+		# pub path
+		#utm = WGS84toUTM(latitude,longitude)
+		convertor = UTM(latitude, longitude)
+		zone = convertor.GetUTMZone(longitude)
+		xy = [0,0]
+		convertor.LatLonToUTMXY(latitude,longitude,zone,xy)
+		if not self.start_flag:
+			self.start_flag = True
+			self.start_x = xy[0]
+			self.start_y = xy[1]
+		self.path.header.stamp = current_time	
+		pose = PoseStamped()
+		pose.pose.position.x = xy[0] - self.start_x
+		pose.pose.position.y = xy[1] - self.start_y
+		self.path.poses.append(pose)
+		self.path_pub.publish(self.path)		
 
                 if not (math.isnan(data['utc_time'][0]) or self.use_GNSS_time):
                     current_time_ref.time_ref = rospy.Time(
