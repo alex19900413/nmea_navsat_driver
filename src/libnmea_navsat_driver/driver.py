@@ -43,7 +43,6 @@ from tf.transformations import quaternion_from_euler
 from nav_msgs.msg import Path
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
-from WGS84toUTM import WGS84toUTM
 from utmConvertor import UTM
 from geometry_msgs.msg import PoseStamped
 
