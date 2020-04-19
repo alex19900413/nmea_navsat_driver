@@ -306,7 +306,7 @@ class RosNMEADriver(object):
 		convertor = UTM(latitude, longitude)
 		zone = convertor.GetUTMZone(longitude)
 		xy = [0,0]
-		convertor.LatLonToUTMXY(latitude,longitude,zone,xy)
+		convertor.LatLonToUTMXY(convertor.DegToRad(latitude),convertor.DegToRad(longitude),zone,xy)
 		if not self.start_flag:
 			self.start_flag = True
 			self.start_x = xy[0]
