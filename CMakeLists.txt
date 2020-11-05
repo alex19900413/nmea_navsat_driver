@@ -3,6 +3,7 @@ project(nmea_navsat_driver)
 
 find_package(catkin REQUIRED)
 
+
 catkin_python_setup()
 catkin_package()
 

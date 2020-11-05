@@ -101,7 +101,7 @@ class RosNMEADriver(object):
 	self.start_x = 0
 	self.start_y = 0
 	self.path = Path()
-	self.path.header.frame_id = "gps"
+	self.path.header.frame_id = "map"
         """Format for this dictionary is the fix type from a GGA message as the key, with
         each entry containing a tuple consisting of a default estimated
         position error, a NavSatStatus value, and a NavSatFix covariance value."""
@@ -349,6 +349,18 @@ class RosNMEADriver(object):
                 current_heading.header.stamp = current_time
                 current_heading.header.frame_id = frame_id
                 q = quaternion_from_euler(0, 0, math.radians(data['heading']))
+                current_heading.quaternion.x = q[0]
+                current_heading.quaternion.y = q[1]
+                current_heading.quaternion.z = q[2]
+                current_heading.quaternion.w = q[3]
+                self.heading_pub.publish(current_heading)
+        elif 'SHR' in parsed_sentence:
+            data = parsed_sentence['SHR']
+            if data['heading']:
+                current_heading = QuaternionStamped()
+                current_heading.header.stamp = current_time
+                current_heading.header.frame_id = frame_id
+                q = quaternion_from_euler(0, 0,math.pi / 2 - math.radians(data['heading']))
                 current_heading.quaternion.x = q[0]
                 current_heading.quaternion.y = q[1]
                 current_heading.quaternion.z = q[2]

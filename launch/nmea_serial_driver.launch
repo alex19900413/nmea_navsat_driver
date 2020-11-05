@@ -2,12 +2,13 @@
 
   <!-- A simple launch file for the nmea_serial_driver node. -->
 
-  <arg name="port" default="/dev/ttyUSB0" />
-  <arg name="baud" default="115200" />
-  <arg name="frame_id" default="gps" />
+  <arg name="port" default="/dev/gps_1" />
+  <!--arg name="baud" default="115200" /-->
+  <arg name="baud" default="460800" />
+  <arg name="frame_id" default="map" />
   <arg name="use_GNSS_time" default="False" />
   <arg name="time_ref_source" default="gps" />
-  <arg name="useRMC" default="True" />
+  <arg name="useRMC" default="False" />
 
   <node name="nmea_serial_driver_node" pkg="nmea_navsat_driver" type="nmea_serial_driver" output="screen">
     <param name="port" value="$(arg port)"/>
